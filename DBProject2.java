@@ -1,10 +1,3 @@
-/** COP3703 : Project 2 Part 1  - DB System Implamentation
- * Devan McCarthy, Ernest Miller, Jacob Wyman
- *
- *
- */
-
-
 import javax.swing.*;
 import java.io.*;
 import java.sql.*;
