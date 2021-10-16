@@ -1,0 +1,159 @@
+﻿CREATE DATABASE BookStore;
+USE BookStore;
+
+CREATE TABLE PUBLISHER( 
+
+	PUB_NAME varchar(255) NOT NULL unique, 
+
+    PUB_ID int NOT NULL PRIMARY KEY AUTO_INCREMENT, 
+
+	PUB_EMAIL varchar(255) NOT NULL unique, 
+
+    PUB_PHONE char(12) NOT NULL unique
+
+); 
+
+CREATE TABLE AUTHOR( 
+
+    AUT_ID int NOT NULL PRIMARY KEY AUTO_INCREMENT, 
+
+    AUT_FNAME varchar(255) NOT NULL, 
+
+    AUT_LNAME varchar(255) NOT NULL, 
+
+    AUT_INITIAL char(1), 
+
+    AUT_EMAIL varchar(255) NOT NULL unique, 
+
+    AUT_PHONE char(12) unique
+    
+); 
+
+CREATE TABLE USER ( 
+
+	USE_CODE int NOT NULL PRIMARY KEY AUTO_INCREMENT, 
+
+	USE_LNAME varchar(255) NOT NULL,  
+
+	USE_FNAME varchar(255) NOT NULL,  
+
+	USE_INITIAL char(1),
+
+    USE_PHONE char(12) NOT NULL unique,  
+    
+    USE_EMAIL varchar(255) NOT NULL unique,
+
+    USE_BALANCE decimal(20,2) NOT NULL DEFAULT 0.00,
+    
+    USE_BOOKS_RENTED INT NOT NULL DEFAULT 0,
+    
+    USE_LATE_FEES decimal(20,2) NOT NULL DEFAULT 0.00
+
+); 
+
+CREATE TABLE BOOK_TITLE( 
+
+    BK_ISBN CHAR (13) NOT NULL PRIMARY KEY, 
+
+	BK_TITLE varchar(255) NOT NULL,
+    
+    PUB_ID int NOT NULL, 
+
+    BK_RELEASE date NOT NULL, 
+
+    BK_FORMAT SET ("PaperBack","HardCover","EBook","AudioBook", "Large Print") NOT NULL, 
+    
+    BK_DISPLAY BOOLEAN NOT NULL DEFAULT TRUE,
+
+    foreign key (PUB_ID) references Publisher(PUB_ID) ON DELETE NO ACTION ON UPDATE CASCADE
+
+); 
+
+CREATE TABLE BOOK_AUTHOR(
+
+	BK_ISBN CHAR (13) NOT NULL,
+
+	AUT_ID int NOT NULL,
+
+	foreign key (BK_ISBN) references BOOK_TITLE(BK_ISBN),
+
+	foreign key (AUT_ID) references AUTHOR(AUT_ID),
+    
+    PRIMARY KEY(BK_ISBN,AUT_ID)
+
+);
+
+CREATE TABLE BOOK_GENRE(
+
+	GENRE varchar(50) NOT NULL,
+    
+    SUBGENRE varchar(50) NOT NULL,
+    
+    BK_ISBN CHAR (13) NOT NULL,
+    
+    NEW_RELEASE BOOLEAN NOT NULL,
+    
+    foreign key (BK_ISBN) references BOOK_TITLE(BK_ISBN),
+    
+    PRIMARY KEY(GENRE,SUBGENRE,BK_ISBN)
+
+);
+
+CREATE TABLE BOOK_INVENTORY(
+	BK_ID int NOT NULL PRIMARY KEY auto_increment,
+    
+    BK_ISBN CHAR (13) NOT NULL,
+    
+    BK_STATUS set ( "Sold", "Available", "Rented") NOT NULL, 
+    
+    BK_PRICE DECIMAL(20, 2) NOT NULL DEFAULT 0.00,
+    
+    BK_CONDITION SET ("New", "Used"),
+    
+    BK_INV_DATE DATE NOT NULL, /*THIS IS THE DATE THE BOOK STORE ADDED THE BOOK TO ITS INVENTORY*/
+    
+    BK_RENT_SELL SET ("Rent", "Sell") NOT NULL,	
+    
+    BK_LOCATION varchar(6) NOT NULL,
+    
+	FOREIGN KEY (BK_ISBN) REFERENCES BOOK_TITLE(BK_ISBN) ON DELETE CASCADE ON UPDATE CASCADE
+
+);
+
+
+
+CREATE TABLE INVOICE( 
+
+	INV_NUMBER int NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+
+    BK_ID int NOT NULL, 
+
+    USE_CODE int NOT NULL, 
+
+    INV_DATE date NOT NULL, 
+
+    INV_DUE date, 
+
+    INV_TOTAL decimal (20,2) NOT NULL, 
+
+    INV_AMTPAID decimal (20,2) NOT NULL, 
+    
+    INV_CARD_NUMBER CHAR(16),
+
+    INV_TYPE set ("Rent", "Sold") NOT NULL, 
+
+    FOREIGN KEY (USE_CODE) REFERENCES User(USE_CODE) ON DELETE NO ACTION ON UPDATE CASCADE, 
+
+    FOREIGN KEY (BK_ID) REFERENCES Book_INVENTORY(BK_ID) ON DELETE NO ACTION ON UPDATE CASCADE
+
+); 
+
+
+Create View search as
+select book_inventory.BK_ID, book_title.BK_TITLE,  book_title.BK_ISBN, book_title.BK_FORMAT, book_inventory.BK_RENT_SELL, book_inventory.BK_STATUS, book_inventory.BK_LOCATION
+from book_title
+	join book_inventory
+		on  book_inventory.BK_ISBN = book_title.BK_ISBN;
+
+
+
